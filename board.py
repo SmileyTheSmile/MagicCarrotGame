@@ -14,7 +14,7 @@ class Board:
         self.width = size[0]
         self.height = size[1]
         self.cell_size = tile_size
-        self.board = [[Block((i,j),'grass1.png',0) for i in range(self.tiles_w)] for j in range(self.tiles_h)]
+        self.board = [[Block((i,j),'grass1.png',0) for i in range(self.tiles_h)] for j in range(self.tiles_w)]
         for i in range(self.tiles_w):
             for j in range(self.tiles_h):
                 for m in tiles:
