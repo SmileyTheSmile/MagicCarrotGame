@@ -16,7 +16,7 @@ pygame.init()
 SIZE = WIDTH, HEIGHT = 512, 512
 screen = pygame.display.set_mode(SIZE)
 running = True
-bullet_delay = 240
+bullet_delay = 10
 
 board = Board((16, 16), SIZE, 32,
               [Block((1,1),'stone1.png',1)])
@@ -61,10 +61,14 @@ while running:
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             player.shooting = False  
     if player.shooting:
-        for i in bullet_sprites:
-            if not i.shot:  
-                i.shoot(bullet_pos)
-                break        
+        if bullet_delay == 10:
+            for i in bullet_sprites:
+                if not i.shot:  
+                    i.shoot(bullet_pos)
+                    bullet_delay = 0
+                    break       
+        else:
+            bullet_delay+=1
     bullet_sprites.update(player,board)                       
     player.move(board)
     level_tiles_sprites.draw(screen)

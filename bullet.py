@@ -24,17 +24,17 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect() 
         self.rect.x,self.rect.y = default_pos[0],default_pos[1]
         self.angle = 0
-        self.speed = 10
+        self.speed = 1
         self.shot = False
         
     def change_default_pos(self,player):
-        self.rect.x,self.rect.y = player.rect.x,player.rect.y
+        self.rect.x,self.rect.y = player.rect.center[0]-2,player.rect.center[1]-2
     def shoot(self,pos):
         self.shot = True
-        self.angle = get_angle((self.rect.x,self.rect.y), pos)
+        self.angle = get_angle(self.rect.center, pos)
 
     def move(self):
-        self.rect.x,self.rect.y = project((self.rect.x,self.rect.y), self.angle, self.speed)
+        self.rect.center = project(self.rect.center, self.angle, self.speed)
         
 class Bullet_Clip(pygame.sprite.Group):
     def __init__(self, bullets_number):
