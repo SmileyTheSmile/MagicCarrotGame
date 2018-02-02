@@ -18,17 +18,22 @@ screen = pygame.display.set_mode(SIZE)
 running = True
 bullet_delay = 10
 
-board = Board((16, 16), SIZE, 32,
-              [Block((1,1),'stone1.png',1)])
+board = Board((16, 16), SIZE, 32, [[Block('grass1.png',(i,j)) for i in range(16)] for j in range(16)],
+              [((2,4),None),((2,3),None),((2,2),None),((2,1),None)])
+
+board_collision = Board((16, 16), SIZE, 32,[[None for i in range(16)] for j in range(16)],
+                        [((1,1),Block('stone1.png')),((2,4),Block('stone2.png'))])
 
 player = Player((260,260))
 level_tiles_sprites=pygame.sprite.Group()
+level_walls = pygame.sprite.Group()
 player_sprites=pygame.sprite.GroupSingle()
 bullet_sprites=Bullet_Clip(32)
 for i in range(32):
     bullet_sprites.add(Bullet((260,260)))
 player_sprites.add(player)
 board.load(level_tiles_sprites)
+board_collision.load(level_walls)
 
 while running:
     for event in pygame.event.get():
@@ -69,11 +74,12 @@ while running:
                     break       
         else:
             bullet_delay+=1
-    bullet_sprites.update(player,board)                       
-    player.move(board)
+    bullet_sprites.update(player,level_walls)                       
+    player.move(board_collision)
     level_tiles_sprites.draw(screen)
     bullet_sprites.draw(screen)
     player_sprites.draw(screen)
+    level_walls.draw(screen)
     clock.tick(100)
     print(clock.get_fps())
     pygame.display.flip()

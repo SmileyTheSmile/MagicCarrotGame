@@ -24,7 +24,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect() 
         self.rect.x,self.rect.y = default_pos[0],default_pos[1]
         self.angle = 0
-        self.speed = 1
+        self.speed = 10
         self.shot = False
         
     def change_default_pos(self,player):
@@ -47,7 +47,11 @@ class Bullet_Clip(pygame.sprite.Group):
             if i.shot:
                 n1, n2 = i.rect.x, i.rect.y         
                 if 0 < n1-1 and n1+1 < 512 and 0 < n2-1 and n2+1 < 512:
-                    i.move()
+                    if not pygame.sprite.groupcollide(self, level,True,False):
+                        i.move()
+                    else: 
+                        i.shot = False
+                        i.change_default_pos(player)                    
                 else: 
                     i.shot = False
                     i.change_default_pos(player)
