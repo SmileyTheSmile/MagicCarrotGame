@@ -1,13 +1,5 @@
 import pygame,os
 from math import atan2,pi,sin,cos
-def get_angle(origin, destination):
-    x_dist = destination[0] - origin[0]
-    y_dist = destination[1] - origin[1]
-    return atan2(-y_dist, x_dist) % (2 * pi)
-
-def project(pos, angle, distance):
-    return (pos[0] + (cos(angle) * distance),
-            pos[1] - (sin(angle) * distance))
 
 def load_image(name, colorkey = None):
     fullname = os.path.join('resourses', name)
@@ -31,10 +23,16 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.x,self.rect.y = player.rect.center[0]-2,player.rect.center[1]-2
     def shoot(self,pos):
         self.shot = True
-        self.angle = get_angle(self.rect.center, pos)
+        self.angle = self.get_angle(pos)
+    
+    def get_angle(self, destination):
+        x_dist = destination[0] - self.rect.center[0]
+        y_dist = destination[1] - self.rect.center[1]
+        return atan2(-y_dist, x_dist) % (2 * pi)    
 
     def move(self):
-        self.rect.center = project(self.rect.center, self.angle, self.speed)
+        self.rect.center = (self.rect.center[0] + (cos(self.angle) * self.speed),
+                self.rect.center[1] - (sin(self.angle) * self.speed))
         
 class Bullet_Clip(pygame.sprite.Group):
     def __init__(self, bullets_number):
