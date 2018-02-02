@@ -19,10 +19,11 @@ running = True
 bullet_delay = 10
 
 board = Board((16, 16), SIZE, 32, [[Block('grass1.png',(i,j)) for i in range(16)] for j in range(16)],
-              [((2,4),None),((2,3),None),((2,2),None),((2,1),None)])
+              [((2,4),None),((2,3),None),((2,2),None),((2,1),None),
+               ((1,4),None),((1,3),None),((1,2),None),((1,1),None)])
 
 board_collision = Board((16, 16), SIZE, 32,[[None for i in range(16)] for j in range(16)],
-                        [((1,1),Block('stone1.png')),((2,4),Block('stone2.png'))])
+                        [((1,4),Block('stone2.png')),((2,4),Block('stone2.png'))])
 
 player = Player((260,260))
 level_tiles_sprites=pygame.sprite.Group()
@@ -66,20 +67,21 @@ while running:
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             player.shooting = False  
     if player.shooting:
-        if bullet_delay == 10:
-            for i in bullet_sprites:
+        for i in bullet_sprites:
                 if not i.shot:  
                     i.shoot(bullet_pos)
                     bullet_delay = 0
                     break       
-        else:
-            bullet_delay+=1
     bullet_sprites.update(player,level_walls)                       
-    player.move(board_collision)
+    render_order = player.move(board_collision)
     level_tiles_sprites.draw(screen)
     bullet_sprites.draw(screen)
-    player_sprites.draw(screen)
-    level_walls.draw(screen)
+    if render_order:
+        player_sprites.draw(screen)
+        level_walls.draw(screen)
+    else:
+        level_walls.draw(screen)  
+        player_sprites.draw(screen)      
     clock.tick(100)
     print(clock.get_fps())
     pygame.display.flip()

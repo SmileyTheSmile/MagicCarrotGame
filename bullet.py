@@ -45,7 +45,7 @@ class Bullet_Clip(pygame.sprite.Group):
             if i.shot:
                 n1, n2 = i.rect.x, i.rect.y         
                 if 0 < n1-1 and n1+1 < 512 and 0 < n2-1 and n2+1 < 512:
-                    if not pygame.sprite.groupcollide(self, level,True,False):
+                    if not pygame.sprite.spritecollideany(i,level):
                         i.move()
                     else: 
                         i.shot = False
