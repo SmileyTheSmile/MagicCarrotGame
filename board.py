@@ -23,7 +23,6 @@ class Board:
                         self.board[i][j] = m[1]
                 if isinstance(self.board[i][j],Block):
                     self.board[i][j].update_pos((i,j)) 
-        print(self.board)
                                               
                         
     def check_collision(self,p1,p2):

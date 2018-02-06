@@ -33,14 +33,15 @@ class Bullet(pygame.sprite.Sprite):
     def move(self):
         self.rect.center = (self.rect.center[0] + (cos(self.angle) * self.speed),
                 self.rect.center[1] - (sin(self.angle) * self.speed))
-        
-class Bullet_Clip(pygame.sprite.Group):
+    
+#
+class Bullet_group(pygame.sprite.Group):
     def __init__(self, bullets_number):
         super().__init__() 
         for i in range(bullets_number):
             self.add(Bullet((260,260)))
-    
-    def update(self,player,level):
+
+    def update(self,player,level,pos):
         for i in self.sprites():
             if i.shot:
                 n1, n2 = i.rect.x, i.rect.y         
