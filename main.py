@@ -73,6 +73,7 @@ while running:
         if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             player.shooting = False  
     if player.shooting:
+        #player_gun.sprite.update(looking_pos,player)
         for i in bullet_sprites:
             if not i.shot:  
                 i.shoot(click_pos)
@@ -80,17 +81,20 @@ while running:
                 break       
     bullet_sprites.update(player,level_walls,click_pos)     
     render_order = player.move(board_collision)
-    #player_gun.sprite.update(looking_pos,player)
+
     level_tiles_sprites.draw(screen)
+    bullet_sprites.draw(screen)
     if render_order:
         player_sprites.draw(screen)
         level_walls.draw(screen)
     else:
         level_walls.draw(screen)  
         player_sprites.draw(screen)  
-    bullet_sprites.draw(screen)
+    
     #player_gun.draw(screen)
     clock.tick(100)
     print(clock.get_fps())
     pygame.display.flip()
 pygame.quit()
+
+#https://gamedev.stackexchange.com/questions/75530/how-do-i-make-a-sprite-move-to-another-position-using-vectors

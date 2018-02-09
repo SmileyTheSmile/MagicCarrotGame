@@ -42,8 +42,10 @@ class Player(pygame.sprite.Sprite):
                 if r1:
                     self.rect.x+=2 
         player_pos = level.get_cell(n1, n2+self.rect.height) 
-        if level.board[player_pos[0]-1][player_pos[1]-1]!=None or level.board[player_pos[0]+1][player_pos[1]-1]!=None or level.board[player_pos[0]][player_pos[1]-1]!=None:
-            order = False
+        l1, u1, r1 = player_pos[0]-1, player_pos[1]-1, player_pos[0]+1
+        if r1+1<=len(level.board[0]) and l1+1<=len(level.board[0]):
+            if level.board[l1][u1]!=None or level.board[r1][u1]!=None or level.board[player_pos[0]][u1]!=None:
+                order = False
         return order
     
 class Gun(pygame.sprite.Sprite):
