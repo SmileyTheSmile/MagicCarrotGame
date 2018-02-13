@@ -61,9 +61,10 @@ class Gun(pygame.sprite.Sprite):
     def get_angle(self, destination):
         x_dist = destination[0] - self.rect.center[0]
         y_dist = destination[1] - self.rect.center[1]
-        return atan2(-y_dist, x_dist) % (2 * pi)   
+        return math.atan2(-y_dist, x_dist) % (2 * math.pi)   
     def update(self,pos,player):
         self.image = pygame.transform.rotate(self.image,self.get_angle(pos))
+        self.rect = self.image.get_rect()
         self.rect.center = player.rect.center[0], player.rect.center[1]
 
 class UI_Element(pygame.sprite.Sprite):

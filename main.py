@@ -98,7 +98,7 @@ while running:
     bullet_sprites.update(player,level_walls,click_pos)     
     render_order = player.move(board_collision)
     enemies.update(player.rect.center,board_collision)
-    #player_gun.sprite.update(looking_pos,player)
+    player_gun.sprite.update(looking_pos,player)
     level_tiles_sprites.draw(screen)
     bullet_sprites.draw(screen)
     if render_order:
@@ -108,7 +108,7 @@ while running:
         level_walls.draw(screen)  
         player_sprites.draw(screen)  
     enemies.draw(screen)
-    #player_gun.draw(screen)
+    player_gun.draw(screen)
     player_ui.draw(screen)
     player_health_and_ammo.draw(screen)
     clock.tick(100)
@@ -117,3 +117,4 @@ while running:
 pygame.quit()
 
 #https://gamedev.stackexchange.com/questions/75530/how-do-i-make-a-sprite-move-to-another-position-using-vectors
+#https://stackoverflow.com/questions/46697502/how-to-move-a-sprite-according-to-an-angle-in-pygame
