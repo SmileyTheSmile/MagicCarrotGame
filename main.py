@@ -46,7 +46,9 @@ player_health_and_ammo.add(player_heart3)
 player_ui.add(player_ui_sprite)
 
 enemies=Enemies()
+enemies.add(Enemy((100,100),"potato_enemy_01.png"))
 enemies.add(Enemy((400,400),"potato_enemy_01.png"))
+enemies.add(Enemy((200,200),"potato_enemy_01.png"))
 
 for i in range(32):
     bullet_sprites.add(Bullet((260,260)))
@@ -113,3 +115,5 @@ while running:
     print(clock.get_fps())
     pygame.display.flip()
 pygame.quit()
+
+#https://gamedev.stackexchange.com/questions/75530/how-do-i-make-a-sprite-move-to-another-position-using-vectors

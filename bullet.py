@@ -1,4 +1,5 @@
-import pygame,os,math
+import pygame,os
+from math import sqrt
 
 def load_image(name, colorkey = None):
     fullname = os.path.join('resourses', name)
@@ -23,24 +24,14 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.x,self.rect.y = player.rect.center[0]-2,player.rect.center[1]-2
     def shoot(self,pos):
         self.shot = True
-        self.angle = self.get_angle(pos)
-    
-    def get_angle(self, destination):
-        dx = destination[0] - self.rect.center[0]
-        dy = destination[1] - self.rect.center[1]
-        
-        dz = math.sqrt(dx**2 + dy**2)
-        
+        dx = pos[0] - self.rect.center[0]
+        dy = -(pos[1] - self.rect.center[1])
+        dz = sqrt(dx**2 + dy**2)
         self.speedx = dx/dz * self.speed
-        self.speedy = dy/dz * self.speed
-
+        self.speedy = dy/dz * self.speed        
     def move(self):
-        player_x = self.speedx + self.rect.center[0]
-        player_y = self.speedy + self.rect.center[1]  
-        self.rect.center = (self.rect.center[0] + self.speedx, self.rect.center[1] + self.speedy)
-        if (self.rect.center[0] != int(player_x)) or (self.rect.center[1] != int(player_y)):
-            self.rect.center = int(player_x),int(player_y)    
-#
+        self.rect.center = (self.rect.center[0] + self.speedx, self.rect.center[1] - self.speedy)
+    
 class Bullet_group(pygame.sprite.Group):
     def __init__(self, bullets_number):
         super().__init__() 
