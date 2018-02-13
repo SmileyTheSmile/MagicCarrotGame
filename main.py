@@ -46,7 +46,7 @@ player_health_and_ammo.add(player_heart3)
 player_ui.add(player_ui_sprite)
 
 enemies=Enemies()
-enemies.add(Enemy((100,100),"potato_enemy_01.png"))
+enemies.add(Enemy((100,200),"potato_enemy_01.png"))
 enemies.add(Enemy((400,400),"potato_enemy_01.png"))
 enemies.add(Enemy((200,200),"potato_enemy_01.png"))
 
@@ -97,7 +97,7 @@ while running:
                 break       
     bullet_sprites.update(player,level_walls,click_pos)     
     render_order = player.move(board_collision)
-    enemies.update(player.rect.center)
+    enemies.update(player.rect.center,board_collision)
     #player_gun.sprite.update(looking_pos,player)
     level_tiles_sprites.draw(screen)
     bullet_sprites.draw(screen)

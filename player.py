@@ -8,41 +8,6 @@ def load_image(name, colorkey = None):
         print('Cannot load image:', name)
         raise SystemExit(message)  
 
-def calc_angle(mypos,pos):
-    myX,myY,targetX,targetY = mypos[0],mypos[1],pos[0],pos[1]
-    if(myX > targetX):
-        dx = myX - targetX
-    else:
-        dx = targetX - myX 
-    if(myY > targetY):
-        dy = myY - targetY
-    else:
-        dy = targetY - myY
-
-    if(dy == 0):
-        dy = 1
-    if(dx == 0):
-        dx = 1
-
-    #Calc Movement
-    if(dx > dy):
-        Speedy = dy/dx 
-        Speedx = 1
-    if(dx < dy):
-        Speedy = 1
-        Speedx = dx/dy
-    elif(dx == dy):
-        Speedx = 1
-        Speedy = 1
-
-    if(myX > targetX):
-        Speedx = Speedx * -1
-    if(myY > targetY):
-        Speedy = Speedy * -1
-
-
-    return Speedx,Speedy
-
 class Player(pygame.sprite.Sprite):
     image = load_image("player01.png")
     def __init__(self, pos):
@@ -129,9 +94,9 @@ class Enemies(pygame.sprite.Group):
         self.health = 3
         self.ammo = 50         
     
-    def update(self,player_pos):
+    def update(self,player_pos,level):
         for i in self.sprites():
-            i.move(player_pos)
+            i.move(player_pos,level)
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos,image):
@@ -140,11 +105,56 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
-        self.speed = 10
+        self.speed = 1
         self.shooting = False 
         self.key = {'right':False, 'up':False, 'left':False, 'down':False}
         self.w,self.h=self.rect.width,self.rect.height     
+
+    def calc_angle(self,mypos,pos):
+        myX,myY,targetX,targetY = mypos[0],mypos[1],pos[0],pos[1]
+        if(myX > targetX):
+            dx = myX - targetX
+        else:
+            dx = targetX - myX 
+        if(myY > targetY):
+            dy = myY - targetY
+        else:
+            dy = targetY - myY
+    
+        if(dy == 0):
+            dy = 1
+        if(dx == 0):
+            dx = 1
+    
+        #Calc Movement
+        if(dx > dy):
+            Speedy = dy/dx 
+            Speedx = self.speed
+        if(dx < dy):
+            Speedy = 1
+            Speedx = dx/dy
+        elif(dx == dy):
+            Speedx = self.speed
+            Speedy = self.speed
+    
+        if(myX > targetX):
+            Speedx = Speedx * -1
+        if(myY > targetY):
+            Speedy = Speedy * -1
+    
+    
+        return Speedx,Speedy
         
-    def move(self,player_pos):
-        speedx,speedy = calc_angle(self.rect.center,player_pos)
-        self.rect.center = (self.rect.center[0] + speedx, self.rect.center[1] + speedy)         
+    def move(self,player_pos,level):
+        speedx,speedy = self.calc_angle(self.rect.center,player_pos)
+        n1, n2, n3, n4 = self.rect.x + speedx, self.rect.y + speedy + self.rect.height, self.rect.x + speedx + self.rect.width, self.rect.y + speedy + self.rect.height
+        if level.check_collision(int(n1), int(n2)):
+            if level.check_collision(int(n3), int(n4)):
+                self.rect.center = (self.rect.center[0] + speedx, self.rect.center[1] + speedy)
+            else:
+                self.rect.center = (self.rect.center[0], self.rect.center[1] + self.speed)
+        else:
+            if level.check_collision(int(n3), int(n4)):
+                self.rect.center = (self.rect.center[0] + speedx, self.rect.center[1])
+            else:
+                self.rect.center = (self.rect.center[0] + self.speed, self.rect.center[1])
