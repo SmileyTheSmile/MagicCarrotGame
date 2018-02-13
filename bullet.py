@@ -1,5 +1,4 @@
-import pygame,os
-from math import atan2,pi,sin,cos
+import pygame,os,math
 
 def load_image(name, colorkey = None):
     fullname = os.path.join('resourses', name)
@@ -18,6 +17,7 @@ class Bullet(pygame.sprite.Sprite):
         self.angle = 0
         self.speed = 10
         self.shot = False
+        self.x, self.y = default_pos[0],default_pos[1]
         
     def change_default_pos(self,player):
         self.rect.x,self.rect.y = player.rect.center[0]-2,player.rect.center[1]-2
@@ -26,14 +26,20 @@ class Bullet(pygame.sprite.Sprite):
         self.angle = self.get_angle(pos)
     
     def get_angle(self, destination):
-        x_dist = destination[0] - self.rect.center[0]
-        y_dist = destination[1] - self.rect.center[1]
-        return atan2(-y_dist, x_dist) % (2 * pi)    
+        dx = destination[0] - self.rect.center[0]
+        dy = destination[1] - self.rect.center[1]
+        
+        dz = math.sqrt(dx**2 + dy**2)
+        
+        self.speedx = dx/dz * self.speed
+        self.speedy = dy/dz * self.speed
 
     def move(self):
-        self.rect.center = (self.rect.center[0] + (cos(self.angle) * self.speed),
-                self.rect.center[1] - (sin(self.angle) * self.speed))
-    
+        player_x = self.speedx + self.rect.center[0]
+        player_y = self.speedy + self.rect.center[1]  
+        self.rect.center = (self.rect.center[0] + self.speedx, self.rect.center[1] + self.speedy)
+        if (self.rect.center[0] != int(player_x)) or (self.rect.center[1] != int(player_y)):
+            self.rect.center = int(player_x),int(player_y)    
 #
 class Bullet_group(pygame.sprite.Group):
     def __init__(self, bullets_number):

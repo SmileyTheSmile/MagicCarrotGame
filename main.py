@@ -1,5 +1,5 @@
 import pygame
-from player import Player,Gun
+from player import Player,Gun,Player_UI,UI_Element,Enemy,Enemies
 from bullet import Bullet,Bullet_group
 from board import Board, Block
 
@@ -33,6 +33,21 @@ player_sprites=pygame.sprite.GroupSingle()
 bullet_sprites=Bullet_group(32)
 player_gun = pygame.sprite.GroupSingle()
 player_gun.add(Gun(player_default_pos))
+
+player_ui = Player_UI()
+player_health_and_ammo = Player_UI()
+player_heart1 = UI_Element((30,28),'player_heart.png')
+player_heart2 = UI_Element((50,28),'player_heart.png')
+player_heart3 = UI_Element((70,28),'player_heart.png')
+player_ui_sprite = UI_Element((0,0),'ui_frame.png')
+player_health_and_ammo.add(player_heart1)
+player_health_and_ammo.add(player_heart2)
+player_health_and_ammo.add(player_heart3)
+player_ui.add(player_ui_sprite)
+
+enemies=Enemies()
+enemies.add(Enemy((400,400),"potato_enemy_01.png"))
+
 for i in range(32):
     bullet_sprites.add(Bullet((260,260)))
 player_sprites.add(player)
@@ -80,16 +95,20 @@ while running:
                 break       
     bullet_sprites.update(player,level_walls,click_pos)     
     render_order = player.move(board_collision)
+    enemies.update(player.rect.center)
     #player_gun.sprite.update(looking_pos,player)
     level_tiles_sprites.draw(screen)
+    bullet_sprites.draw(screen)
     if render_order:
         player_sprites.draw(screen)
         level_walls.draw(screen)
     else:
         level_walls.draw(screen)  
         player_sprites.draw(screen)  
-    bullet_sprites.draw(screen)
+    enemies.draw(screen)
     #player_gun.draw(screen)
+    player_ui.draw(screen)
+    player_health_and_ammo.draw(screen)
     clock.tick(100)
     print(clock.get_fps())
     pygame.display.flip()
