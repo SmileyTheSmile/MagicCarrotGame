@@ -21,8 +21,8 @@ class Bullet(pygame.sprite.Sprite):
         dy = -(pos[1] - self.rect.center[1])
         dz = sqrt(dx**2 + dy**2)
         self.speedx = dx/dz * self.speed
-        self.speedy = dy/dz * self.speed         
-   
+        self.speedy = dy/dz * self.speed
+        
     def update(self,level):
         if 0 < self.rect.x-1 and self.rect.x+1 < 512 and 0 < self.rect.y-1 and self.rect.y+1 < 512:
             if not pygame.sprite.spritecollideany(self,level):
@@ -31,7 +31,7 @@ class Bullet(pygame.sprite.Sprite):
                 self.kill()
         else:
             self.kill()                
-
+    
 class Bullet_Group(pygame.sprite.Group):
     def __init__(self):
         super().__init__()  
