@@ -1,5 +1,6 @@
 import pygame,os,math
 from bullet import Bullet
+
 def load_image(name, colorkey = None):
     fullname = os.path.join('resourses', name)
     try:
@@ -17,6 +18,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
         self.current_frame = 0
+        self.health = 3
         self.shooting = False         
         self.image = self.frames['right'][self.current_frame]
         self.rect = self.rect.move(20,38)
@@ -86,9 +88,8 @@ class Gun(pygame.sprite.Sprite):
         y_dist = destination[1] - self.rect.center[1]
         return math.atan2(-y_dist, x_dist) % (2 * math.pi)   
     def update(self,pos,player):
-        self.image = pygame.transform.rotate(self.image,self.get_angle(pos))
         self.rect = self.image.get_rect()
-        self.rect.center = player.rect.center[0], player.rect.center[1]
+        self.rect.center = player.rect.center[0], player.rect.center[1]+10
 
 class UI_Element(pygame.sprite.Sprite):
     def __init__(self, pos, image):
@@ -102,23 +103,30 @@ class UI_Element(pygame.sprite.Sprite):
 class Player_UI(pygame.sprite.Group):
     def __init__(self):
         super().__init__()
-        self.health = 3
-        self.ammo = 50         
+        self.health = [UI_Element((30,28),'player_heart.png'),
+                       UI_Element((50,28),'player_heart.png'),
+                       UI_Element((70,28),'player_heart.png')]
     
-    def update(self,health,ammo):
-        self.health = health
-        self.ammo = ammo     
-    
-    def draw_values(self,screen):
-        pass
+    def get_stats(self, player):
+        for i in self.sprites():
+            i.kill()         
+        if player.health == 3:
+            for i in self.health:
+                self.add(i)                            
+        if player.health == 2:
+            for i in self.health[:2]:
+                self.add(i)
+        elif player.health == 1:
+            self.add(self.health[:1]) 
+            
                
 class Enemies(pygame.sprite.Group):
     def __init__(self):
         super().__init__()    
     
-    def update(self,player_pos,level,bullets):
+    def update(self,player_pos,level,bullets,player):
         for i in self.sprites():
-            i.move(player_pos,level,bullets)
+            i.move(player_pos,level,bullets,player)
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos,image):
@@ -150,7 +158,6 @@ class Enemy(pygame.sprite.Sprite):
         if(dx == 0):
             dx = 1
     
-        #Calc Movement
         if(dx > dy):
             Speedy = dy/dx 
             Speedx = self.speed
@@ -165,58 +172,67 @@ class Enemy(pygame.sprite.Sprite):
             Speedx = Speedx * -1
         if(myY > targetY):
             Speedy = Speedy * -1
-    
-    
+
         return Speedx,Speedy
         
-    def move(self,player_pos,level,bullets):
+    def move(self,player_pos,level,bullets,player):
         speedx,speedy = self.calc_angle(self.rect.center,player_pos)
-        if not pygame.sprite.spritecollideany(self,bullets):
-            d1 = level.check_collision(self.rect.x + self.k, self.rect.y + self.rect.height + 1 + self.k)
-            d2 = level.check_collision(self.rect.x + self.rect.width + self.k, self.rect.y + self.rect.height + 1 + self.k)
-            
-            dul = level.check_collision(self.rect.x - 1 - self.k, self.rect.y + self.rect.height - 1 - self.k) 
-            dur = level.check_collision(self.rect.x + self.rect.width + 1 + self.k, self.rect.y + self.rect.height-1 + self.k)
-            
-            u1 = level.check_collision(self.rect.x + self.k, self.rect.y + self.rect.height - 1 - self.k)
-            u2 = level.check_collision(self.rect.x + self.rect.width + self.k, self.rect.y + self.rect.height - 1 - self.k)
-            
-            r1 = level.check_collision(self.rect.x + self.rect.width + 1 + self.k, self.rect.y + self.rect.height + self.k)
-            
-            l1 = level.check_collision(self.rect.x - 1 - self.k,self.rect.y + self.rect.height + self.k)
-            
-            ddl = level.check_collision(self.rect.x - 1 - self.k, self.rect.y+self.rect.height + 1 + self.k)
-            ddr = level.check_collision(self.rect.x + self.rect.width + 1 + self.k, self.rect.y + self.rect.height + 1 + self.k)
-            
-            #col_list = pygame.sprite.spritecollide(self,self.groups()[0],False)
-            
-            if u1 and u2 and d1 and d2 and r1 and l1 and dul and dur and ddl and ddr:
-                self.rect.x, self.rect.y = self.rect.x + speedx, self.rect.y + speedy
-            else:
-                if not u1 or not u2:
-                    self.rect.x = self.rect.x + self.speed        
-                elif not d1 or not d2:
-                    self.rect.x = self.rect.x + self.speed
-                elif not ddl:
-                    self.rect.x, self.rect.y = self.rect.x + (self.speed * 2),self.rect.y + self.speed
-                elif not ddr:
-                    self.rect.x, self.rect.y = self.rect.x - (self.speed * 2),self.rect.y + self.speed
-                elif not dul:
-                    self.rect.x, self.rect.y = self.rect.x + (self.speed * 2),self.rect.y - self.speed
-                elif not dur:
-                    self.rect.x, self.rect.y = self.rect.x - (self.speed * 2),self.rect.y - self.speed
-                elif not l1:
-                    if not dul:
-                        self.rect.y = self.rect.y - self.speed     
-                    elif not ddl:
-                        self.rect.y = self.rect.y + self.speed   
-                elif not r1:
-                    if not dur:
-                        self.rect.y = self.rect.y - self.speed     
-                    elif not ddr:
-                        self.rect.y = self.rect.y + self.speed              
-        else:
+        if pygame.sprite.spritecollideany(self,bullets):
+            col_list = pygame.sprite.spritecollide(self,bullets,False)
             if self.health - bullets.damage <= 0:
                 self.kill()
+                for i in col_list:
+                    i.kill()                
+                return             
             else:
                 self.health -= bullets.damage
+                for i in col_list:
+                    i.kill()                
+            
+        if pygame.sprite.spritecollideany(self,player):
+            player.sprites()[0].health -= 1
+            self.kill()
+            return            
+        d1 = level.check_collision(self.rect.x + self.k, self.rect.y + self.rect.height + 1 + self.k,True)
+        d2 = level.check_collision(self.rect.x + self.rect.width + self.k, self.rect.y + self.rect.height + 1 + self.k,True)
+        
+        dul = level.check_collision(self.rect.x - 1 - self.k, self.rect.y + self.rect.height - 1 - self.k,True) 
+        dur = level.check_collision(self.rect.x + self.rect.width + 1 + self.k, self.rect.y + self.rect.height-1 + self.k,True)
+        
+        u1 = level.check_collision(self.rect.x + self.k, self.rect.y + self.rect.height - 1 - self.k,True)
+        u2 = level.check_collision(self.rect.x + self.rect.width + self.k, self.rect.y + self.rect.height - 1 - self.k,True)
+        
+        r1 = level.check_collision(self.rect.x + self.rect.width + 1 + self.k, self.rect.y + self.rect.height + self.k,True)
+        
+        l1 = level.check_collision(self.rect.x - 1 - self.k,self.rect.y + self.rect.height + self.k,True)
+        
+        ddl = level.check_collision(self.rect.x - 1 - self.k, self.rect.y+self.rect.height + 1 + self.k,True)
+        ddr = level.check_collision(self.rect.x + self.rect.width + 1 + self.k, self.rect.y + self.rect.height + 1 + self.k,True)
+        
+        #col_list = pygame.sprite.spritecollide(self,self.groups()[0],False)
+        
+        if u1 and u2 and d1 and d2 and r1 and l1 and dul and dur and ddl and ddr:
+            self.rect.x, self.rect.y = self.rect.x + speedx, self.rect.y + speedy
+        else:
+            if not u1 or not u2:
+                self.rect.x = self.rect.x + self.speed        
+            elif not d1 or not d2:
+                self.rect.x = self.rect.x + self.speed
+            elif not ddl:
+                self.rect.x, self.rect.y = self.rect.x + (self.speed * 2),self.rect.y + self.speed
+            elif not ddr:
+                self.rect.x, self.rect.y = self.rect.x - (self.speed * 2),self.rect.y + self.speed
+            elif not dul:
+                self.rect.x, self.rect.y = self.rect.x + (self.speed * 2),self.rect.y - self.speed
+            elif not dur:
+                self.rect.x, self.rect.y = self.rect.x - (self.speed * 2),self.rect.y - self.speed
+            elif not l1:
+                if not dul:
+                    self.rect.y = self.rect.y - self.speed     
+                elif not ddl:
+                    self.rect.y = self.rect.y + self.speed   
+            elif not r1:
+                if not dur:
+                    self.rect.y = self.rect.y - self.speed     
+                elif not ddr:
+                    self.rect.y = self.rect.y + self.speed              
