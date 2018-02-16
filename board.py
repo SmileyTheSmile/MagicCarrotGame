@@ -28,7 +28,7 @@ class Board:
     def check_collision(self,p1,p2):
         coords = self.get_cell(p1, p2)
         if coords!=None:
-            if self.board[coords[0]][coords[1]]==None:
+            if self.board[int(coords[0])][int(coords[1])]==None:
                 return True
         return False
     
