@@ -1,29 +1,21 @@
 import pygame,os
-
-def load_image(name, colorkey = None):
-    fullname = os.path.join('resourses', name)
-    try:
-        return pygame.image.load(fullname)
-    except pygame.error as message:
-        print('Cannot load image:', name)
-        raise SystemExit(message) 
+from load_image import load_image
     
 class Board:
-    def __init__(self, tiles_size, size, tile_size, default_tile, tiles, collision = True):
+    def __init__(self, tiles_size, size, tile_size, default_tile, tiles, spawns = None):
         self.tiles_w = tiles_size[0]
         self.tiles_h = tiles_size[1]
         self.width = size[0]
         self.height = size[1]
         self.cell_size = tile_size
-        self.collision = collision
         self.board = default_tile
-        for i in range(self.tiles_w):
-            for j in range(self.tiles_h):
+        for i in range(len(self.board)):
+            for j in range(len(self.board[i])):
                 for m in tiles:
                     if (i, j) == m[0]:
-                        self.board[i][j] = m[1]
-                if isinstance(self.board[i][j],Block):
-                    self.board[i][j].update_pos((i, j)) 
+                        self.board[j][i] = m[1]
+                if isinstance(self.board[j][i],Block):
+                    self.board[j][i].update_pos((j, i)) 
                                               
                         
     def check_collision(self, p1, p2,enemy = False):
@@ -40,6 +32,7 @@ class Board:
             return (w // self.cell_size, h // self.cell_size)
     
     def load(self, group):
+        print(self.board)
         for i in self.board:
             for j in i:
                 if j != None:
@@ -51,10 +44,14 @@ class Block(pygame.sprite.Sprite):
         super().__init__()
         self.image = load_image(type)
         self.rect = self.image.get_rect()
-        self.rect.topleft = pos[0] * self.rect.width, pos[1] * self.rect.height 
+        self.square = True
+        if  self.rect.height != self.rect.width:
+            self.square = False
+        self.rect.topleft = pos[0] * self.rect.width, pos[1] * self.rect.height    
+        
     def update_pos(self, pos):
         self.rect.topleft = pos[0] * self.rect.width, pos[1] * self.rect.height  
         if self.rect.height > self.rect.width:
             self.rect.y = pos[1] * self.rect.width - self.rect.height + self.rect.width
         else:
-            self.rect.y = pos[1] * self.rect.height     
+            self.rect.y = pos[1] * self.rect.height

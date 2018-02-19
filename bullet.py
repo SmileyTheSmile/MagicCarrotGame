@@ -1,13 +1,6 @@
 import pygame,os
 from math import sqrt
-
-def load_image(name, colorkey = None):
-    fullname = os.path.join('resourses', name)
-    try:
-        return pygame.image.load(fullname)
-    except pygame.error as message:
-        print('Cannot load image:', name)
-        raise SystemExit(message) 
+from load_image import load_image
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, default_pos, pos):
@@ -22,20 +15,31 @@ class Bullet(pygame.sprite.Sprite):
         self.speedx = dx/dz * self.speed
         self.speedy = dy/dz * self.speed
         
-    def update(self, level):
+    def update(self, level, player):
+        destroy = False
         if 0 < self.x - 1 and self.x + 1 < 512 and 0 < self.y-1 and self.y + 1 < 512:
-            if not pygame.sprite.spritecollideany(self, level):
-                self.rect.center = (self.rect.center[0] + self.speedx, self.rect.center[1] - self.speedy)
-            else:
-                self.kill()
+            collided_walls = pygame.sprite.spritecollide(self, level, False)
+            if len(collided_walls) != 0:
+                collided = False
+                for i in collided_walls:
+                    if self.rect.colliderect(i.rect):
+                        collided = True
+                        break
+                if collided:
+                    if not pygame.sprite.collide_rect(player, collided_walls[0]):
+                        destroy = True
         else:
-            self.kill()                
+            destroy = True
+        if destroy:
+            self.kill()
+        else:
+            self.rect.center = (self.rect.center[0] + self.speedx, self.rect.center[1] - self.speedy)
     
 class Bullet_Group(pygame.sprite.Group):
     def __init__(self):
         super().__init__()  
         self.damage = 1
     
-    def update(self, level):
+    def update(self, level, player):
         for i in self.sprites():
-            i.update(level)
+            i.update(level, player)
