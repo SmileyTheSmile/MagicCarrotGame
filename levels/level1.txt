@@ -1,0 +1,17 @@
+grass01.png ; 228'32 ; 600'600'4, -32'600'4, 256'600'4
+concrete01.png concrete01.png concrete01.png concrete01.png None None None concrete03.png concrete03.png None None None concrete01.png concrete01.png concrete01.png concrete01.png
+concrete01.png concrete01.png concrete01.png concrete01.png None None None concrete03.png concrete03.png None None None concrete01.png concrete01.png concrete01.png concrete01.png 
+concrete01.png concrete01.png concrete01.png concrete01.png None None None concrete03.png concrete03.png None None None concrete01.png concrete01.png concrete01.png concrete01.png
+def concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png def
+def stone_stairs01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png concrete01.png stone_stairs02.png def
+def def def def def def def stone_stairs01.png stone_stairs02.png def def def def def def def
+def def hay02.png def def hay02.png def stone_stairs01.png stone_stairs02.png def def def def
+def def def hay02.png hay02.png def def def road01.png road01.png def def def def def def
+def def def def def def road01.png road01.png def def def def def def def def
+def def def def def def road01.png road01.png def def def def grass02.png grass02.png def def
+def def def def def def def road01.png road01.png def def def def grass02.png def def
+def def def def def def def def road01.png road01.png def def def def def def
+def def def def def def def road01.png road01.png def def def def def def def
+def def def def def def road01.png road01.png def def def def def def def def
+def grass02.png grass02.png def def def def road01.png road01.png def def def def def def def
+def grass02.png grass02.png def def def road01.png road01.png def def def def def def def def
