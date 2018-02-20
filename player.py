@@ -1,28 +1,17 @@
 import pygame,os,math
 from bullet import Bullet
-from load_image import load_image
+from tools import load_image, Vegetable, AnimatedSprite
 from pygame.math import Vector2
 
-class Player(pygame.sprite.Sprite):
-    image = load_image("player_sprites.png")
-    def __init__(self, pos):
-        super().__init__()
-        self.frames = {'right' : [], 'left' : [], 'down' : [], 'up' : []}
-        self.cut_sheet(Player.image, 9, 4)        
-        self.rect.x = pos[0]
-        self.rect.y = pos[1]
-        self.current_frame = 0
-        self.health = 3
-        self.shooting = False         
-        self.death_sound = pygame.mixer.Sound('sound/damage_player01.wav')       
-        self.image = self.frames['right'][self.current_frame]
-        self.rect = self.rect.move(20,38)
+class Player(Vegetable):
+    def __init__(self, pos, image, death_sound, rows, cols, health, speed):
+        super().__init__(pos, image, death_sound, rows, cols, health, speed, True)
+        self.shooting = False      
         self.current_dir = 'right'
         self.key = {'right':False, 'up':False, 'left':False, 'down':False}
         self.w, self.h = self.rect.width, self.rect.height
         
     def move(self, level):
-        order = False
         n1, n2 = self.rect.x, self.rect.y
         if not self.key['up'] and not self.key['down'] and not self.key['right'] and not self.key['left']:
             self.current_frame = -1
@@ -53,7 +42,12 @@ class Player(pygame.sprite.Sprite):
                     if right1:
                         self.rect.x += 2 
                 self.current_dir = 'right'
-            player_pos = level.get_cell(n1, n2+self.h) 
+            
+        order = self.check_order(n1, n2, level)
+        return order
+        
+    def check_order(self, n1, n2, level):
+        order = False
         player_pos = level.get_cell(n1, n2 + self.h) 
         up1 = player_pos[1] - 1
         up2 = player_pos[1] - 2
@@ -61,17 +55,19 @@ class Player(pygame.sprite.Sprite):
         right2 = player_pos[0] + 2
         left1 = player_pos[0] - 1
         left2 = player_pos[0] - 2
+        down1 = player_pos[1] + 1
 
         if right2 + 1 <= len(level.board[0]) and left2 + 1 <= len(level.board[0]) and up2 + 1 <= len(level.board[1]):
             if level.board[player_pos[0]][up1] == None and level.board[player_pos[0]][up2] == None and level.board[right1][up1] == None and level.board[right2][up2] == None and level.board[left1][up1] == None and level.board[left2][up2] == None:
                 order = True
             else:
                 if level.board[right1][player_pos[1]] != None:
-                    if level.board[right1][player_pos[1]].square and level.board[player_pos[0]][player_pos[1] + 1] != None:
-                        order = True                    
+                    if level.board[right1][player_pos[1]].square and level.board[player_pos[0]][down1] != None:
+                        if not level.board[player_pos[0]][down1].square:
+                            order = True                   
                 elif level.board[left1][player_pos[1]] != None:
-                    if level.board[left1][player_pos[1]].square and level.board[player_pos[0]][player_pos[1] + 1] != None:
-                        if level.board[player_pos[0]][player_pos[1] + 1].square:
+                    if level.board[left1][player_pos[1]].square and level.board[player_pos[0]][down1] != None:
+                        if not level.board[player_pos[0]][down1].square:
                             order = True
         return order        
     
@@ -88,24 +84,11 @@ class Player(pygame.sprite.Sprite):
         self.current_frame = (self.current_frame + 1) % len(self.frames[key])
         self.image = self.frames[key][self.current_frame]    
     
-class Gun(pygame.sprite.Sprite):
+class Gun(AnimatedSprite):
     image_gun = load_image("ak43.png")
     def __init__(self, pos):
-        super().__init__()
-        self.frames = []
-        self.cut_sheet(Gun.image_gun,10,1)
-        self.current_frame = 0
-        self.image = self.frames[self.current_frame]
-        self.rect = self.rect.move(pos[0], pos[1])
+        super().__init__(Gun.image_gun, 10, 1, pos, False)
         self.rect.center = self.rect.topleft
-        
-    def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
-                                sheet.get_height() // rows)
-        for j in range(rows):
-            for i in range(columns):
-                frame_location = (self.rect. w * i, self.rect.h * j)
-                self.frames.append(sheet.subsurface(pygame.Rect(frame_location,self.rect.size)))
     
     def get_angle(self, destination):
         side = destination[1] - self.rect.center[1]
@@ -153,9 +136,7 @@ class UI_Element(pygame.sprite.Sprite):
         super().__init__()
         self.image = load_image(image)
         self.rect = self.image.get_rect()
-        self.rect.x = pos[0]
-        self.rect.y = pos[1]   
-          
+        self.rect.topleft = pos[0], pos[1]
 
 class Player_UI(pygame.sprite.Group):
     def __init__(self):
@@ -163,18 +144,14 @@ class Player_UI(pygame.sprite.Group):
         self.health = [UI_Element((30,28), 'player_heart.png'),
                        UI_Element((50,28), 'player_heart.png'),
                        UI_Element((70,28), 'player_heart.png')]
+        for i in self.health:
+            self.add(i)
     
     def get_stats(self, player):
         for i in self.sprites():
-            i.kill()         
-        if player.health == 3:
-            for i in self.health:
-                self.add(i)                            
-        if player.health == 2:
-            for i in self.health[:2]:
-                self.add(i)
-        elif player.health == 1:
-            self.add(self.health[:1]) 
+            i.kill()    
+        for i in range(player.health):
+            self.add(self.health[i]) 
             
                
 class Enemies(pygame.sprite.Group):
@@ -185,26 +162,15 @@ class Enemies(pygame.sprite.Group):
         for i in self.sprites():
             i.move(player_pos, level, bullets, player)
 
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self, pos, image, death_sound, group):
-        super().__init__(group)
-        self.frames = []
-        self.cut_sheet(load_image(image),9,2)
-        self.current_frame = 0
-        self.current_row = 0
-        self.image = self.frames[self.current_row][self.current_frame]
-        self.rect = self.rect.move(pos[0], pos[1])        
-        self.speed = 1
-        self.health = 100
+class Enemy(Vegetable):
+    def __init__(self, pos, image, death_sound, rows, cols, health, speed):
+        super().__init__(pos, load_image(image), death_sound, rows, cols, health, speed, None) 
         self.k = 0
         self.killed = False
-        self.shooting = False 
-        self.death_sound = pygame.mixer.Sound('sound/' + death_sound)
-        self.death_sound.set_volume(0.5) 
+        self.hit = False
+        self.hitpoint = (255, 255)
         self.delay = 0
-        self.key = {'right' : False, 'up' : False, 'left' : False, 'down' : False}
-        self.w, self.h = self.rect.width, self.rect.height     
-    
+
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
         for j in range(rows):
@@ -257,6 +223,8 @@ class Enemy(pygame.sprite.Sprite):
                 self.killed = True
                 return             
             else:
+                self.hit = True
+                self.hitpoint = col_list[0].rect.topleft
                 self.health -= bullets.damage
                 for i in col_list:
                     i.kill()                
@@ -283,3 +251,20 @@ class Enemy(pygame.sprite.Sprite):
         else:
             self.delay += 1  
         
+
+class Enemy_Spawn(pygame.sprite.Group):
+    def __init__(self, data):
+        super().__init__()
+        data = data.split("'")
+        self.pos = (int(data[0]), int(data[1]))
+        self.enemies_num = int(data[2])
+    
+    def spawn(self, group):
+        if self.enemies_num != 0:
+            enemy = Enemy(self.pos, "potato_enemy_01.png", 'explode1.wav', 2, 9, 100, 1)
+            group.add(enemy)
+            self.add(enemy)
+            self.enemies_num -= 1
+    def update(self, group):
+        if len(self.sprites()) == 0:
+            self.spawn(group)

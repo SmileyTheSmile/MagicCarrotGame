@@ -1,14 +1,11 @@
 import pygame,os
-from load_image import load_image
+from tools import load_image
     
 class Board:
     def __init__(self, tiles_size, size, tile_size, default_tile, tiles, spawns = None):
-        self.tiles_w = tiles_size[0]
-        self.tiles_h = tiles_size[1]
-        self.width = size[0]
-        self.height = size[1]
-        self.cell_size = tile_size
-        self.board = default_tile
+        self.tiles_w, self.tiles_h = tiles_size[0], tiles_size[1]
+        self.width, self.height = size[0], size[1]
+        self.board, self.cell_size = default_tile, tile_size
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
                 for m in tiles:
@@ -18,7 +15,7 @@ class Board:
                     self.board[j][i].update_pos((j, i)) 
                                               
                         
-    def check_collision(self, p1, p2,enemy = False):
+    def check_collision(self, p1, p2, enemy = False):
         coords = self.get_cell(p1, p2)
         if coords != None:
             if self.board[int(coords[0])][int(coords[1])] == None:
@@ -32,7 +29,6 @@ class Board:
             return (w // self.cell_size, h // self.cell_size)
     
     def load(self, group):
-        print(self.board)
         for i in self.board:
             for j in i:
                 if j != None:
@@ -45,7 +41,7 @@ class Block(pygame.sprite.Sprite):
         self.image = load_image(type)
         self.rect = self.image.get_rect()
         self.square = True
-        if  self.rect.height != self.rect.width:
+        if self.rect.height != self.rect.width:
             self.square = False
         self.rect.topleft = pos[0] * self.rect.width, pos[1] * self.rect.height    
         
