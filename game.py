@@ -34,7 +34,7 @@ def game(level, level_walls_group):
     
     #Игрок
     player_default_pos = list(map(int, level[0][1].split("'")))
-    player = Player(player_default_pos, load_image("player_sprites.png"), 'player_death.wav', 4, 9, 3, 2)
+    player = Player(player_default_pos, load_image("player_sprites.png"), 'damage_player01.wav', 4, 9, 3, 2)
     player_sprites = pygame.sprite.GroupSingle()
     player_gun_sprite = Gun(player_default_pos)
     player_gun = pygame.sprite.GroupSingle()
