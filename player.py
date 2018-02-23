@@ -4,8 +4,8 @@ from tools import load_image, Vegetable, AnimatedSprite
 from pygame.math import Vector2
 
 class Player(Vegetable):
-    def __init__(self, pos, image, death_sound, rows, cols, health, speed):
-        super().__init__(pos, image, death_sound, rows, cols, health, speed, True)
+    def __init__(self, pos, image, death_sound, hit_sound, rows, cols, health, speed):
+        super().__init__(pos, image, death_sound, hit_sound, rows, cols, health, speed, True)
         self.shooting = False      
         self.current_dir = 'right'
         self.key = {'right':False, 'up':False, 'left':False, 'down':False}
@@ -72,8 +72,7 @@ class Player(Vegetable):
         return order        
     
     def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
-        sheet.get_height() // rows)
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
         keys = ['right', 'left', 'down', 'up']
         for j in range(rows):
             for i in range(columns):
@@ -163,13 +162,15 @@ class Enemies(pygame.sprite.Group):
             i.move(player_pos, level, bullets, player)
 
 class Enemy(Vegetable):
-    def __init__(self, pos, image, death_sound, rows, cols, health, speed):
-        super().__init__(pos, load_image(image), death_sound, rows, cols, health, speed, None) 
+    def __init__(self, pos, image, death_sound, hit_sound, rows, cols, health, speed):
+        super().__init__(pos, load_image(image), death_sound, hit_sound, rows, cols, health, speed, None) 
         self.k = 0
         self.killed = False
         self.hit = False
         self.hitpoint = (255, 255)
         self.delay = 0
+        self.hit_sound.set_volume(0.05)
+        self.death_sound.set_volume(0.5)
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
@@ -180,7 +181,8 @@ class Enemy(Vegetable):
                 self.frames[j].append(sheet.subsurface(pygame.Rect(frame_location,self.rect.size)))      
     
     def calc_angle(self,mypos,pos):
-        myX,myY,targetX,targetY = mypos[0],mypos[1],pos[0],pos[1]
+        myX,myY = mypos[0],mypos[1]
+        targetX,targetY = pos[0],pos[1]
         if(myX > targetX):
             dx = myX - targetX
         else:
@@ -225,6 +227,7 @@ class Enemy(Vegetable):
             else:
                 self.hit = True
                 self.hitpoint = col_list[0].rect.topleft
+                self.hit_sound.play()
                 self.health -= bullets.damage
                 for i in col_list:
                     i.kill()                
@@ -233,7 +236,7 @@ class Enemy(Vegetable):
             player.health -= 1
             self.killed = True
             self.death_sound.play()
-            player.death_sound.play()
+            player.hit_sound.play()
             return    
         
         if pygame.sprite.spritecollideany(self, level):
@@ -261,7 +264,7 @@ class Enemy_Spawn(pygame.sprite.Group):
     
     def spawn(self, group):
         if self.enemies_num != 0:
-            enemy = Enemy(self.pos, "potato_enemy_01.png", 'explode1.wav', 2, 9, 100, 1)
+            enemy = Enemy(self.pos, "potato_enemy_01.png", 'explode1.wav', 'damage_player01.wav', 2, 9, 100, 1)
             group.add(enemy)
             self.add(enemy)
             self.enemies_num -= 1

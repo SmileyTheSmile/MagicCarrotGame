@@ -15,7 +15,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
         super().__init__()
         if player != True:
             if rows != 1 or columns != 1:
-                self.oneframe, self.frames ,self.rows, self.cols = False, [], rows, columns
+                self.oneframe = False
+                self.frames = []
+                self.rows = rows
+                self.cols = columns
                 self.current_frame = current_frame
                 self.cut_sheet(sheet, columns, rows)
                 if player != None:
@@ -42,10 +45,12 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.frames.append(sheet.subsurface(pygame.Rect(frame_location,self.rect.size)))
 
 class Vegetable(AnimatedSprite):
-    def __init__(self, pos, image, death_sound, rows, cols, health, speed, player):
+    def __init__(self, pos, image, death_sound, hit_sound, rows, cols, health, speed, player):
         super().__init__(image, cols, rows, pos, player)
-        self.w, self.h = self.rect.width, self.rect.height  
+        self.w = self.rect.width
+        self.h =  self.rect.height  
         self.death_sound = pygame.mixer.Sound('sound/' + death_sound)
+        self.hit_sound = pygame.mixer.Sound('sound/' + hit_sound)
         self.health = health
         self.speed = speed
 
@@ -54,7 +59,8 @@ class Button(AnimatedSprite):
         super().__init__(load_image(image), 2, 1, pos, False)
         self.rect.center = self.rect.topleft
         self.clicking_sound = pygame.mixer.Sound('sound/buttonclick.wav') 
-        self.text, self.text_color = text, color
+        self.text = text
+        self.text_color = color
         pygame.font.init()
         self.font = pygame.font.Font('Pixeled.ttf', 16)
             
@@ -85,7 +91,8 @@ class Bullet_Hole(AnimatedSprite):
 class Explosion(AnimatedSprite):
     def __init__(self, pos, image, rows, cols, delay = 0):
         super().__init__(load_image(image), cols, rows, pos, False)
-        self.delay, self.maxdelay = 0, delay
+        self.delay = 0
+        self.maxdelay =  delay
         self.image = load_image(image)
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
@@ -108,7 +115,10 @@ class Particle(AnimatedSprite):
     gibs = load_image('gibs.png')
     def __init__(self, pos, dx, dy):
         super().__init__(Particle.gibs, 4, 1, pos, False, random.choice(range(4)))
-        self.v, self.gravity, random_x, random_y = [dx,dy], 1, random.choice(range(5)), random.choice(range(5))
+        self.v = [dx,dy]
+        self.gravity = 1
+        random_x = random.choice(range(5))
+        random_y = random.choice(range(5))
         self.rect = self.rect.move(pos[0] + random_x, pos[1] + random_y)
         self.rect.topleft = pos
         

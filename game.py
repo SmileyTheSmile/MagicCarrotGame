@@ -9,14 +9,19 @@ def game(level, level_walls_group):
     pygame.init()
     screen = pygame.display.set_mode(SIZE)
     
-    frame_delay, max_delay = 3, 3
+    frame_delay = 3
+    max_delay = 3
     tile_size = 32
     tile_number_w = int(WIDTH / tile_size)
     tile_number_h = int(HEIGHT / tile_size)
-    try_again, first_win, quit, running  = True, True, False, True
+    
+    try_again = True
+    first_win = True
+    quit =  False
+    running = True
 
     pygame.mixer.init()  
-    pygame.mixer.set_num_channels(24)
+    pygame.mixer.set_num_channels(60)
     
     pygame.mixer.music.load('music/gameplay_music.mp3')
     pygame.mixer.music.set_volume(0.5)
@@ -34,7 +39,7 @@ def game(level, level_walls_group):
     
     #Игрок
     player_default_pos = list(map(int, level[0][1].split("'")))
-    player = Player(player_default_pos, load_image("player_sprites.png"), 'damage_player01.wav', 4, 9, 3, 2)
+    player = Player(player_default_pos, load_image("player_sprites.png"), 'player_death.wav', 'damage_player01.wav', 4, 9, 3, 2)
     player_sprites = pygame.sprite.GroupSingle()
     player_gun_sprite = Gun(player_default_pos)
     player_gun = pygame.sprite.GroupSingle()
@@ -42,12 +47,10 @@ def game(level, level_walls_group):
     player_sprites.add(player)
     player_first_death = True
     
-    #Меню игрока
     player_ui = pygame.sprite.GroupSingle()
     player_health = Player_UI()
     player_ui.add(UI_Element((0,0),'ui_frame.png'))    
     
-    #Уровень
     level_tiles_sprites = pygame.sprite.Group()
     level_walls_group = pygame.sprite.Group()
     board.load(level_tiles_sprites)
@@ -56,7 +59,6 @@ def game(level, level_walls_group):
     
     bullet_sprites = Bullet_Group()
     
-    #Враги
     level_spawns = []
     enemies = Enemies()
     for i in level[0][2]:
@@ -76,26 +78,28 @@ def game(level, level_walls_group):
     victory_sprite.rect = victory_sprite.image.get_rect()  
     victory_sprite.rect.topleft = (victory_sprite.rect.x + (WIDTH // 2) - (victory_sprite.rect.width // 2),victory_sprite.rect.y) 
     
-    victory, game_over = False, False
+    victory = False
+    game_over = False
     
     finale_buttons = pygame.sprite.Group()
     yes_button = Button((WIDTH // 2, 320), 'button.png', 'Дааааааа', [255, 255, 255])
     no_button = Button((WIDTH // 2, 376), 'button.png', 'Не,мне лень', [255, 255, 255])
     finale_buttons.add(yes_button, no_button)
             
-    click_pos, looking_pos = (0,0), (0,0)
+    click_pos = (0,0)
+    looking_pos = (0,0)
     
     def draw_everything():
         level_tiles_sprites.draw(screen)
         if render_order:
-            player_sprites.draw(screen)
             bullet_sprites.draw(screen)
+            player_sprites.draw(screen)
             player_gun.draw(screen)
             level_walls_group.draw(screen)
         else:
+            bullet_sprites.draw(screen)
             level_walls_group.draw(screen)  
             player_sprites.draw(screen) 
-            bullet_sprites.draw(screen)
             player_gun.draw(screen)
         enemies.draw(screen)
         fx_sprites.draw(screen)
@@ -175,7 +179,9 @@ def game(level, level_walls_group):
         else:
             if player.health == 0:
                 if player_first_death:
-                    game_over, player_first_death = True, False
+                    game_over = True
+                    player_first_death = False
+                    player.death_sound.play()
                     fx_sprites.add(Explosion(player.rect.topleft, 'explosion01.png', 1, 10))
                     player.kill()
                     player_gun_sprite.kill()

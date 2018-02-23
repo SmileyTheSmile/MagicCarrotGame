@@ -7,7 +7,9 @@ def title_screen():
     screen = pygame.display.set_mode(SIZE)
     screen_rect = (0, 0, WIDTH, HEIGHT)
     clock = pygame.time.Clock()
-    quit_game, clicked, running = False, False, True
+    quit_game = False
+    clicked = False
+    running = True
     
     gun_shot = pygame.mixer.Sound('sound/pistol_shoot.wav')
     gun_shot.set_volume(0.5)
@@ -30,14 +32,16 @@ def title_screen():
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running, quit_game = False, True  
+                running = False
+                quit_game = True  
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if start_game_button.rect.collidepoint(event.pos):
                     start_game_button.click()
                     clicked = True
                 elif quit_button.rect.collidepoint(event.pos):
                     quit_button.click()
-                    clicked, quit_game = True, True
+                    clicked = True
+                    quit_game = True
                 else:
                     if len(bullet_holes.sprites()) == max_bullet_holes:
                         bullet_holes.sprites()[random.choice(range(max_bullet_holes))].kill()                
