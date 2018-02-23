@@ -26,7 +26,7 @@ class Bullet(pygame.sprite.Sprite):
                 for i in collided_walls:
                     if self.rect.colliderect(i.additional_rect):
                         destroy = True
-                        if i.square:
+                        if len(collided_walls) == 1 and collided_walls[0].square:
                             fx_group.add(Explosion(self.rect.topleft, 'hit01.png', 1, 1, 2))
                         break
                             
